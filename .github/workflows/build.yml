@@ -1,0 +1,50 @@
+name: Build Universal APK
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: 'gradle'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Grant execute permission for Gradle wrapper
+        run: chmod +x gradlew
+
+      - name: Download Gradle dependencies
+        run: ./gradlew --no-daemon --stacktrace help
+
+      - name: Build Debug APKs (per-ABI + universal)
+        run: ./gradlew --no-daemon --stacktrace clean assembleDebug
+
+      - name: Find generated APKs
+        id: apks
+        run: |
+          echo "DIR=app/build/outputs/apk/debug" >> $GITHUB_OUTPUT
+          ls -lah app/build/outputs/apk/debug
+
+      - name: Upload APK artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: JoyMerge-APKs
+          path: |
+            app/build/outputs/apk/debug/*-universal*.apk
+            app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
