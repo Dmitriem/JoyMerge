@@ -4,32 +4,27 @@ plugins {
 }
 
 android {
-    namespace 'com.example.joymerge'
-    compileSdk 35
-
+    // ...
     defaultConfig {
-        applicationId 'com.example.joymerge'
-        minSdk 28
-        targetSdk 35
-        versionCode 1
-        versionName '0.1'
+        // ...
+        // УБРАТЬ, если было (иначе будет только arm64):
+        // ndk { abiFilters 'arm64-v8a' }
+    }
 
-        ndk { abiFilters 'arm64-v8a' }
-
-        externalNativeBuild {
-            cmake {
-                cppFlags '-std=c++20 -fno-exceptions -fno-rtti'
-            }
+    // APK-сплиты по ABI + универсальный APK
+    splits {
+        abi {
+            enable true
+            reset()
+            include 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
+            universalApk true    // ← соберёт один APK с ВСЕМИ ABI
         }
     }
 
+    // чтобы Debug не минифицировался и собирался быстрее
     buildTypes {
-        release { minifyEnabled false }
         debug { minifyEnabled false }
-    }
-
-    externalNativeBuild {
-        cmake { path 'src/main/cpp/CMakeLists.txt' }
+        release { minifyEnabled false } // включите R8 позже при желании
     }
 }
 
