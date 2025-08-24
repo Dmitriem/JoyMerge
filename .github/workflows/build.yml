@@ -1,4 +1,4 @@
-name: Build Universal APK
+name: Build Universal APK(1)
 
 on:
   push:
@@ -26,13 +26,13 @@ jobs:
         uses: android-actions/setup-android@v3
 
       - name: Grant execute permission for Gradle wrapper
-        run: gradle assembleDebug
+        run: chmod +x gradlew
 
       - name: Download Gradle dependencies
         run: ./gradlew --no-daemon --stacktrace help
 
       - name: Build Debug APKs (per-ABI + universal)
-        run: gradle assembleDebug
+        run: ./gradlew --no-daemon --stacktrace clean assembleDebug
 
       - name: Find generated APKs
         id: apks
